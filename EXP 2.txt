@@ -1,0 +1,49 @@
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from io import StringIO
+
+csv_data = """Sky,AirTemp,Humidity,Wind,Water,Forecast,EnjoySport
+Sunny,Warm,Normal,Strong,Warm,Same,Yes
+Sunny,Warm,High,Strong,Warm,Same,Yes
+Rainy,Cold,High,Strong,Warm,Change,No
+Sunny,Warm,High,Strong,Cool,Change,Yes"""
+
+df = pd.read_csv(StringIO(csv_data))
+S = ['0'] * 6
+G = [['?'] * 6]
+
+for row in df.values.tolist():
+    x, target = row[:-1], row[-1]
+    if target == 'Yes':
+        G = [g for g in G if all(a == '?' or a == b for a, b in zip(g, x))]
+        for i in range(6):
+            if S[i] == '0':
+                S[i] = x[i]
+            elif S[i] != x[i]:
+                S[i] = '?'
+    else:
+        new_G = []
+        for g in G:
+            for i in range(6):
+                if g[i] == '?' and S[i] not in ('0', '?') and S[i] != x[i]:
+                    h = g.copy()
+                    h[i] = S[i]
+                    new_G.append(h)
+        G = new_G
+
+print("Specific Boundary S:", S)
+print("General Boundary G:", G)
+
+plt.figure(figsize=(8, 4))
+plt.plot(range(1, 7), [str(x) for x in S], 'bo-', label='Specific Boundary S')
+for g in G:
+    plt.plot(range(1, 7), g, 'ro--', label='General Boundary G')
+plt.xticks(range(1, 7), df.columns[:-1], rotation=20)
+plt.xlabel("Attributes")
+plt.ylabel("Hypothesis Values")
+plt.title("Candidate-Elimination Algorithm")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()

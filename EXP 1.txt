@@ -1,0 +1,38 @@
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from io import StringIO
+
+csv_data = """Sky,AirTemp,Humidity,Wind,Water,Forecast,EnjoySport
+Sunny,Warm,Normal,Strong,Warm,Same,Yes
+Sunny,Warm,High,Strong,Warm,Same,Yes
+Rainy,Cold,High,Strong,Warm,Change,No
+Sunny,Warm,High,Strong,Cool,Change,Yes"""
+
+df = pd.read_csv(StringIO(csv_data))
+S = ['0'] * 6
+history = []
+
+for row in df.values.tolist():
+    x, target = row[:-1], row[-1]
+    if target == 'Yes':
+        for i in range(6):
+            if S[i] == '0':
+                S[i] = x[i]
+            elif S[i] != x[i]:
+                S[i] = '?'
+    history.append(S.copy())
+
+print("Final Hypothesis:", S)
+
+plt.figure(figsize=(8, 4))
+for i, h in enumerate(history):
+    plt.plot(range(1, 7), h, marker='o', label=f'Example {i+1}')
+plt.xticks(range(1, 7), df.columns[:-1], rotation=20)
+plt.xlabel("Attributes")
+plt.ylabel("Hypothesis Values")
+plt.title("FIND-S Algorithm")
+plt.grid(True)
+plt.legend()
+plt.tight_layout()
+plt.show()
